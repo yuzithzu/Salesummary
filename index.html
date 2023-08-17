@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sales Report Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+
+        h1, h2, h3 {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="number"] {
+            width: 100px;
+        }
+
+        .container {
+            display: flex;
+        }
+
+        .input-box,
+        .result-box,
+        .summary-box {
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .input-box {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .result-box,
+        .summary-box {
+            flex: 2;
+        }
+
+        .generate-button,
+        button[type="button"] {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Sales Report</h1>
+    <div class="container">
+        <div class="input-box">
+            <label for="date">Date:</label>
+            <input type="date" id="date" name="date"><br><br>
+            
+            <h2>Sales</h2>
+            <label for="anaSales">Ana:</label>
+            <input type="number" id="anaSales" name="anaSales"><br>
+            
+            <label for="almaSales">Alma:</label>
+            <input type="number" id="almaSales" name="almaSales"><br>
+            
+            <label for="jenniferSales">Jennifer:</label>
+            <input type="number" id="jenniferSales" name="jenniferSales"><br><br>
+            
+            <h2>Expenses</h2>
+            <label for="expenses">Expenses:</label>
+            <input type="number" id="expenses" name="expenses"><br><br>
+            
+            <button type="button" onclick="calculateNetProfit()">Calculate Net Profit</button><br><br>
+            
+            <h2>Net Profit</h2>
+            <div class="result-box" id="netProfit"></div><br>
+        </div>
+        
+        <div class="summary-box">
+            <h2>Summary Report</h2>
+            <div id="dailySummary"></div>
+            
+            <button class="generate-button" onclick="generateDailyReport()">Generate Daily Report</button><br><br>
+            <div class="result-box" id="dailyReportResult"></div><br>
+            
+            <button class="generate-button" onclick="generateMonthlyReport()">Generate Monthly Report</button><br><br>
+            <div class="result-box" id="monthlyReportResult"></div><br>
+            
+            <button class="generate-button" onclick="generateYearlyReport()">Generate Yearly Report</button><br><br>
+            <div class="result-box" id="yearlyReportResult"></div>
+        </div>
+    </div>
+    
+    <script>
+        var dailyReports = [];
+        var monthlyReports = {};
+        var yearlyReports = {};
+
+        function calculateNetProfit() {
+            var anaSales = parseFloat(document.getElementById("anaSales").value);
+            var almaSales = parseFloat(document.getElementById("almaSales").value);
+            var jenniferSales = parseFloat(document.getElementById("jenniferSales").value);
+            var expenses = parseFloat(document.getElementById("expenses").value);
+
+            var totalSales = anaSales + almaSales + jenniferSales;
+            var netProfit = totalSales - expenses;
+
+            document.getElementById("netProfit").innerHTML = "Net Profit: PHP" + netProfit.toFixed(2);
+        }
+
+        function generateDailyReport() {
+            var date = document.getElementById("date").value;
+            var anaSales = parseFloat(document.getElementById("anaSales").value);
+            var almaSales = parseFloat(document.getElementById("almaSales").value);
+            var jenniferSales = parseFloat(document.getElementById("jenniferSales").value);
+
+            var report = {
+                date: date,
+                ana: { sales: anaSales.toFixed(2) },
+                alma: { sales: almaSales.toFixed(2) },
+                jennifer: { sales: jenniferSales.toFixed(2) }
+            };
+
+            dailyReports.push(report);
+            updateDailyReport();
+            updateSummaryReport();
+
+            var reportHTML = "<h3>Daily Report for " + date + "</h3>" +
+                             "<p><strong>Ana:</strong> Sales: PHP" + anaSales.toFixed(2) + "</p>" +
+                             "<p><strong>Alma:</strong> Sales: PHP" + almaSales.toFixed(2) + "</p>" +
+                             "<p><strong>Jennifer:</strong> Sales: PHP" + jenniferSales.toFixed(2) + "</p><br>";
+
+            document.getElementById("dailyReportResult").innerHTML = reportHTML;
+        }
+
+        function updateDailyReport() {
+            var dailyReportHTML = "";
+            for (var i = 0; i < dailyReports.length; i++) {
+                dailyReportHTML += "<p><strong>" + dailyReports[i].date + ":</strong> Ana: PHP" + dailyReports[i].ana.sales +
+                                   ", Alma: PHP" + dailyReports[i].alma.sales + ", Jennifer: PHP" + dailyReports[i].jennifer.sales + "</p>";
+            }
+
+            document.getElementById("dailyReportResult").innerHTML = dailyReportHTML;
+        }
+
+        function updateSummaryReport() {
+            var summaryHTML = "<h3>Summary for " + document.getElementById("date").value + "</h3>";
+
+            for (var i = 0; i < dailyReports.length; i++) {
+                summaryHTML += "<p><strong>" + dailyReports[i].date + ":</strong> Total Sales: PHP" +
+                               (parseFloat(dailyReports[i].ana.sales) +
+                                parseFloat(dailyReports[i].alma.sales) +
+                                parseFloat(dailyReports[i].jennifer.sales)).toFixed(2) +
+                               "</p>";
+            }
+
+            document.getElementById("dailySummary").innerHTML = summaryHTML;
+        }
+
+        function generateMonthlyReport() {
+            var date = new Date(document.getElementById("date").value);
+            var month = date.getMonth() + 1; // January is 0
+
+            if (!monthlyReports[month]) {
+                monthlyReports[month] = {
+                    ana: { sales: 0 },
+                    alma: { sales: 0 },
+                    jennifer: { sales: 0 }
+                };
+            }
+
+            for (var i = 0; i < dailyReports.length; i++) {
+                var dailyDate = new Date(dailyReports[i].date);
+                if (dailyDate.getMonth() === month - 1) {
+                    monthlyReports[month].ana.sales += parseFloat(dailyReports[i].ana.sales);
+                    monthlyReports[month].alma.sales += parseFloat(dailyReports[i].alma.sales);
+                    monthlyReports[month].jennifer.sales += parseFloat(dailyReports[i].jennifer.sales);
+                }
+            }
+
+            var reportHTML = "<h3>Monthly Report for " + month + "/" + date.getFullYear() + "</h3>" +
+                             "<p><strong>Ana:</strong> Sales: PHP" + monthlyReports[month].ana.sales.toFixed(2) + "</p>" +
+                             "<p><strong>Alma:</strong> Sales: PHP" + monthlyReports[month].alma.sales.toFixed(2) + "</p>" +
+                             "<p><strong>Jennifer:</strong> Sales: PHP" + monthlyReports[month].jennifer.sales.toFixed(2) + "</p><br>";
+
+            document.getElementById("monthlyReportResult").innerHTML = reportHTML;
+        }
+
+        function generateYearlyReport() {
+            var date = new Date(document.getElementById("date").value);
+            var year = date.getFullYear();
+
+            if (!yearlyReports[year]) {
+                yearlyReports[year] = {
+                    ana: { sales: 0 },
+                    alma: { sales: 0 },
+                    jennifer: { sales: 0 }
+                };
+            }
+
+            for (var i = 0; i < dailyReports.length; i++) {
+                var dailyDate = new Date(dailyReports[i].date);
+                if (dailyDate.getFullYear() === year) {
+                    yearlyReports[year].ana.sales += parseFloat(dailyReports[i].ana.sales);
+                    yearlyReports[year].alma.sales += parseFloat(dailyReports[i].alma.sales);
+                    yearlyReports[year].jennifer.sales += parseFloat(dailyReports[i].jennifer.sales);
+                }
+            }
+
+            var reportHTML = "<h3>Yearly Report for " + year + "</h3>" +
+                             "<p><strong>Ana:</strong> Sales: PHP" + yearlyReports[year].ana.sales.toFixed(2) + "</p>" +
+                             "<p><strong>Alma:</strong> Sales: PHP" + yearlyReports[year].alma.sales.toFixed(2) + "</p>" +
+                             "<p><strong>Jennifer:</strong> Sales: PHP" + yearlyReports[year].jennifer.sales.toFixed(2) + "</p><br>";
+
+            document.getElementById("yearlyReportResult").innerHTML = reportHTML;
+        }
+    </script>
+</body>
+</html>
